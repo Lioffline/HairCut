@@ -481,3 +481,72 @@ exports.completeAppointment = async (req, res) => {
         res.redirect('/');
     }
 };
+
+
+// Функции админа
+
+// Добавим метод для страницы управления пользователями
+exports.adminUsers = async (req, res) => {
+    try {
+        if (req.session.user?.role_id !== 3) { // Проверка на администратора
+            return res.redirect('/');
+        }
+
+        const [users] = await db.promise().query(`
+            SELECT u.id, u.email, u.full_name, u.gender, u.phone, 
+                   r.name as role_name, u.role_id, 
+                   b.name as branch_name, u.branch_id
+            FROM users u
+            LEFT JOIN roles r ON u.role_id = r.id
+            LEFT JOIN branches b ON u.branch_id = b.id
+            ORDER BY u.role_id, u.full_name
+        `);
+
+        const [branches] = await db.promise().query('SELECT * FROM branches');
+        const [roles] = await db.promise().query('SELECT * FROM roles WHERE id != 3'); // Исключаем админов
+
+        res.render('adminUsers', {
+            title: 'Управление пользователями',
+            isAuthenticated: true,
+            user: req.session.user,
+            users,
+            branches,
+            roles,
+            errors: req.session.errors
+        });
+
+        req.session.errors = null;
+    } catch (error) {
+        console.error('Ошибка при загрузке пользователей:', error);
+        res.redirect('/');
+    }
+};
+
+// Добавим метод для обновления пользователя
+exports.updateUser = async (req, res) => {
+    try {
+        if (req.session.user?.role_id !== 3) {
+            return res.redirect('/');
+        }
+
+        const { id } = req.params;
+        const { role_id, branch_id } = req.body;
+
+        // Валидация
+        if (role_id == 2 && !branch_id) {
+            req.session.errors = [{ msg: 'Для мастера должен быть выбран филиал' }];
+            return res.redirect('/admin/users');
+        }
+
+        await db.promise().query(
+            'UPDATE users SET role_id = ?, branch_id = ? WHERE id = ? AND role_id != 3',
+            [role_id, role_id == 2 ? branch_id : null, id]
+        );
+
+        res.redirect('/admin/users');
+    } catch (error) {
+        console.error('Ошибка при обновлении пользователя:', error);
+        req.session.errors = [{ msg: 'Ошибка при обновлении пользователя' }];
+        res.redirect('/admin/users');
+    }
+};

@@ -43,36 +43,37 @@
 </head>
 <body class="bg-light">
     {{> navbar}}
-
+        {{#unless isAuthenticated}}
     <div class="container welcome-container bg-white">
-    <div class="text-center mb-4">
-        <h1 class="display-4 mb-3">Добро пожаловать!</h1>
-        
-        <div class="status-icon text-success">
-            <i class="bi bi-check-circle-fill"></i>
+
+
+        <div class="text-center mb-4">
+            <h1 class="display-4 mb-3">Добро пожаловать!</h1>
+
+            <div class="status-icon text-primary">
+                <i class="bi bi-info-circle-fill"></i>
+            </div>
+            <div class="alert alert-primary fs-5">
+                Зарегистрируйтесь, чтобы получить доступ ко всем функциям приложения.
+            </div>
         </div>
-        <div class="alert alert-success fs-5">
-            Приложение работает корректно
-        </div>
-    </div>
+
 
         <div class="auth-section card p-4 mb-4">
             {{#if isAuthenticated}}
-                <div class="d-flex justify-content-between align-items-center">
-                    <p class="mb-0">Вы вошли как: <strong class="text-primary">{{user.full_name}}</strong></p>
-                    <a href="/logout" class="btn btn-outline-danger">Выйти</a>
-                </div>
+
             {{else}}
                 <div class="text-center">
                     <p class="mb-3">Вы не авторизованы</p>
                     <div class="d-flex justify-content-center gap-3">
-                        <a href="/login" class="btn btn-primary px-4">Войти</a>
                         <a href="/register" class="btn btn-outline-primary px-4">Зарегистрироваться</a>
+                        <a href="/login" class="btn btn-primary px-4">Войти</a>
                     </div>
                 </div>
             {{/if}}
         </div>
     </div>
+            {{/unless}}
 
 
     {{#if isAuthenticated}}

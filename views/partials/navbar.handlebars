@@ -1,6 +1,5 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
   <div class="container">
-    <!-- Логотип и название -->
     <a class="navbar-brand d-flex align-items-center" href="/">
       <i class="bi bi-scissors me-2" style="font-size: 1.5rem; color: #9d7aff;"></i>
       <span class="fw-bold">HairCut</span>
@@ -11,11 +10,32 @@
     </button>
     
     <div class="collapse navbar-collapse" id="navbarContent">
-      <ul class="navbar-nav ms-auto">
+      <ul class="navbar-nav ms-auto align-items-center">
+
         {{#if isAuthenticated}}
-          <!-- Авторизованный пользователь -->
+
+          {{#if (eq user.id 1)}}
+          <li class="nav-item">
+            <a class="nav-link" href="/appointments/new">
+              <i class="bi bi-file-plus me-1"></i> Новая запись
+            </a>
+          </li>
+          {{/if}}
+
+          {{#if (eq user.role_id 3)}}
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/users">
+              <i class="bi bi-people me-1"></i> Пользователи
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/stats">
+              <i class="bi bi-bar-chart-line me-1"></i> Статистика
+            </a>
+          </li>
+          {{/if}}
+
           <li class="nav-item dropdown">
-            
             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
               {{#if user.avatar_path}}
                 <img src="/files/{{user.avatar_path}}" 
@@ -25,60 +45,44 @@
               {{else}}
                 <div class="avatar-placeholder rounded-circle bg-primary d-flex align-items-center justify-content-center me-2" 
                      style="width: 32px; height: 32px;">
-                  <span class="text-white">{{user.full_name}}</span>
+                  <span class="text-white">{{user.full_name.[0]}}</span>
                 </div>
               {{/if}}
               <span>{{user.full_name}}</span>
             </a>
-            
             <ul class="dropdown-menu dropdown-menu-end">
               <li>
                 <a class="dropdown-item" href="/settings">
                   <i class="bi bi-gear me-2"></i>Настройки
                 </a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                <a class="dropdown-item" href="/appointments/new">
-                  <i class="bi bi-file-plus me-2"></i>Новая запись
-                </a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                <a class="dropdown-item" href="/admin/users">
-                  <i class="bi bi-file-plus me-2"></i>Страница админа
-                </a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                <a class="dropdown-item" href="/admin/stats">
-                  <i class="bi bi-file-plus me-2"></i>Статистика
-                </a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
                 <a class="dropdown-item text-danger" href="/logout">
                   <i class="bi bi-box-arrow-right me-2"></i>Выйти
                 </a>
               </li>
             </ul>
           </li>
+          
         {{else}}
-          <!-- Неавторизованный пользователь -->
           <li class="nav-item">
             <a class="nav-link" href="/register">
-              <i class="bi bi-person-plus me-1"></i>Регистрация
+              <i class="bi bi-person-plus me-1"></i> Регистрация
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="/login">
-              <i class="bi bi-box-arrow-in-right me-1"></i>Вход
+              <i class="bi bi-box-arrow-in-right me-1"></i> Вход
             </a>
           </li>
         {{/if}}
+        
       </ul>
     </div>
   </div>
 </nav>
+
 
 <style>
   .avatar-placeholder {

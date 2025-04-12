@@ -491,6 +491,10 @@ exports.adminUsers = async (req, res) => {
             return res.redirect('/');
         }
 
+        const searchQuery = req.query.search || '';
+        const searchParam = `%${searchQuery}%`;
+
+        // Обновленный запрос с поиском
         const [users] = await db.promise().query(`
             SELECT u.id, u.email, u.full_name, u.gender, u.phone, 
                    r.name as role_name, u.role_id, 
@@ -498,11 +502,12 @@ exports.adminUsers = async (req, res) => {
             FROM users u
             LEFT JOIN roles r ON u.role_id = r.id
             LEFT JOIN branches b ON u.branch_id = b.id
+            WHERE u.full_name LIKE ? OR u.email LIKE ? OR u.phone LIKE ?
             ORDER BY u.role_id, u.full_name
-        `);
+        `, [searchParam, searchParam, searchParam]);
 
         const [branches] = await db.promise().query('SELECT * FROM branches');
-        const [roles] = await db.promise().query('SELECT * FROM roles'); // Теперь включаем все роли
+        const [roles] = await db.promise().query('SELECT * FROM roles');
 
         res.render('adminUsers', {
             title: 'Управление пользователями',
@@ -511,13 +516,14 @@ exports.adminUsers = async (req, res) => {
             users,
             branches,
             roles,
-            errors: req.session.errors
+            errors: req.session.errors,
+            searchQuery
         });
 
         req.session.errors = null;
     } catch (error) {
         console.error('Ошибка при загрузке пользователей:', error);
-        res.redirect('/');
+        res.redirect('/admin');
     }
 };
 

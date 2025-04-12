@@ -33,6 +33,29 @@
             <a href="/" class="btn btn-outline-secondary">На главную</a>
         </div>
 
+        <!-- Добавляем форму поиска -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form action="/admin/users" method="GET" class="row g-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="search" 
+                                placeholder="Поиск по имени, email или телефону" 
+                                value="{{searchQuery}}">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="bi bi-search"></i> Поиск
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="/admin/users" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-counterclockwise"></i> Сбросить
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         {{#if errors}}
             <div class="alert alert-danger">
                 <ul class="mb-0">

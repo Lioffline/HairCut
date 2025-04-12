@@ -29,7 +29,20 @@ const helpers = {
     },
     gt: function(a, b) {
         return a > b;
-    }
+    },
+    not: function(a) {
+        return !a;
+    },
+    and: function(a, b) {
+        return a && b;
+    },
+    neq: function(a, b) {
+        return a !== b;
+    },
+};
+
+helpers.round = function(value) {
+    return Math.round(value);
 };
 
 helpers.formatDateMin = function() {

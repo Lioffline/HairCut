@@ -485,10 +485,9 @@ exports.completeAppointment = async (req, res) => {
 
 // Функции админа
 
-// Добавим метод для страницы управления пользователями
 exports.adminUsers = async (req, res) => {
     try {
-        if (req.session.user?.role_id !== 3) { // Проверка на администратора
+        if (req.session.user?.role_id !== 3) {
             return res.redirect('/');
         }
 
@@ -503,7 +502,7 @@ exports.adminUsers = async (req, res) => {
         `);
 
         const [branches] = await db.promise().query('SELECT * FROM branches');
-        const [roles] = await db.promise().query('SELECT * FROM roles WHERE id != 3'); // Исключаем админов
+        const [roles] = await db.promise().query('SELECT * FROM roles'); // Теперь включаем все роли
 
         res.render('adminUsers', {
             title: 'Управление пользователями',
@@ -522,7 +521,7 @@ exports.adminUsers = async (req, res) => {
     }
 };
 
-// Добавим метод для обновления пользователя
+
 exports.updateUser = async (req, res) => {
     try {
         if (req.session.user?.role_id !== 3) {
@@ -532,14 +531,26 @@ exports.updateUser = async (req, res) => {
         const { id } = req.params;
         const { role_id, branch_id } = req.body;
 
-        // Валидация
+        // Проверяем, что не пытаемся изменить другого администратора
+        const [currentUser] = await db.promise().query(
+            'SELECT role_id FROM users WHERE id = ?',
+            [id]
+        );
+
+        if (currentUser[0].role_id === 3 && req.session.user.id !== parseInt(id)) {
+            req.session.errors = [{ msg: 'Нельзя изменять других администраторов' }];
+            return res.redirect('/admin/users');
+        }
+
+        // Валидация для мастера
         if (role_id == 2 && !branch_id) {
             req.session.errors = [{ msg: 'Для мастера должен быть выбран филиал' }];
             return res.redirect('/admin/users');
         }
 
+        // Обновляем пользователя
         await db.promise().query(
-            'UPDATE users SET role_id = ?, branch_id = ? WHERE id = ? AND role_id != 3',
+            'UPDATE users SET role_id = ?, branch_id = ? WHERE id = ?',
             [role_id, role_id == 2 ? branch_id : null, id]
         );
 
@@ -548,5 +559,101 @@ exports.updateUser = async (req, res) => {
         console.error('Ошибка при обновлении пользователя:', error);
         req.session.errors = [{ msg: 'Ошибка при обновлении пользователя' }];
         res.redirect('/admin/users');
+    }
+};
+
+exports.adminStats = async (req, res) => {
+    try {
+        if (req.session.user?.role_id !== 3) {
+            return res.redirect('/');
+        }
+
+        // Статистика по записям
+        const [appointmentStats] = await db.promise().query(`
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'запланирована' THEN 1 ELSE 0 END) as planned,
+                SUM(CASE WHEN status = 'выполнена' THEN 1 ELSE 0 END) as completed,
+                SUM(CASE WHEN status = 'отменена' THEN 1 ELSE 0 END) as canceled,
+                AVG(final_price) as avg_price,
+                SUM(final_price) as total_income
+            FROM appointments
+            WHERE status = 'выполнена'
+        `);
+
+        // Статистика по популярности услуг
+        const [serviceStats] = await db.promise().query(`
+            SELECT h.title, COUNT(*) as count 
+            FROM appointments a
+            JOIN haircuts h ON a.haircut_id = h.id
+            GROUP BY h.title
+            ORDER BY count DESC
+            LIMIT 5
+        `);
+
+        // Статистика по мастерам
+        const [masterStats] = await db.promise().query(`
+            SELECT u.full_name, COUNT(*) as count, SUM(a.final_price) as total
+            FROM appointments a
+            JOIN users u ON a.master_id = u.id
+            WHERE a.status = 'выполнена'
+            GROUP BY u.full_name
+            ORDER BY total DESC
+            LIMIT 5
+        `);
+
+        res.render('adminStats', {
+            title: 'Статистика',
+            isAuthenticated: true,
+            user: req.session.user,
+            appointmentStats: appointmentStats[0],
+            serviceStats,
+            masterStats
+        });
+    } catch (error) {
+        console.error('Ошибка при загрузке статистики:', error);
+        res.redirect('/admin');
+    }
+};
+
+exports.exportStats = async (req, res) => {
+    try {
+        if (req.session.user?.role_id !== 3) {
+            return res.redirect('/');
+        }
+
+        const [stats] = await db.promise().query(`
+            SELECT 
+                a.id,
+                u1.full_name as client_name,
+                u2.full_name as master_name,
+                h.title as service,
+                b.name as branch,
+                a.appointment_time,
+                a.status,
+                a.final_price,
+                a.completed_date
+            FROM appointments a
+            JOIN users u1 ON a.client_id = u1.id
+            JOIN users u2 ON a.master_id = u2.id
+            JOIN haircuts h ON a.haircut_id = h.id
+            JOIN branches b ON a.branch_id = b.id
+            ORDER BY a.appointment_time DESC
+        `);
+
+        let csv = 'ID,Клиент,Мастер,Услуга,Филиал,Дата записи,Статус,Цена,Дата выполнения\n';
+        
+        stats.forEach(row => {
+            csv += `"${row.id}","${row.client_name}","${row.master_name}","${row.service}",` +
+                   `"${row.branch}","${row.appointment_time}","${row.status}",` +
+                   `"${row.final_price || ''}","${row.completed_date || ''}"\n`;
+        });
+
+        res.header('Content-Type', 'text/csv');
+        res.attachment('statistics.csv');
+        res.send(csv);
+    } catch (error) {
+        console.error('Ошибка при экспорте статистики:', error);
+        res.redirect('/admin/stats');
     }
 };

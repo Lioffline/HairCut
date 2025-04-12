@@ -50,6 +50,7 @@ userRouter.post("/appointments/:id/complete", userController.completeAppointment
 // Для администратора
 userRouter.get("/admin/users", userController.adminUsers);
 userRouter.post("/admin/users/:id", userController.updateUser);
-
+userRouter.get("/admin/stats", userController.adminStats);
+userRouter.get("/admin/stats/export", userController.exportStats);
 
 module.exports = userRouter;

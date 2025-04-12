@@ -5,6 +5,24 @@ exports.index = async (req, res) => {
         let appointments = [];
         
         if (req.session.user) {
+            // Для администратора показываем все записи
+            if (req.session.user.role_id === 3) {
+                [appointments] = await db.promise().query(`
+                    SELECT a.*, 
+                            b.name AS branch_name,
+                            h.title AS haircut_title,
+                            h.base_price,
+                            u1.full_name AS client_name,
+                            u2.full_name AS master_name
+                    FROM appointments a
+                    JOIN branches b ON a.branch_id = b.id
+                    JOIN haircuts h ON a.haircut_id = h.id
+                    JOIN users u1 ON a.client_id = u1.id
+                    JOIN users u2 ON a.master_id = u2.id
+                    ORDER BY a.appointment_time DESC
+                    LIMIT 20
+                `);
+            }
             // Для клиентов показываем их записи
             if (req.session.user.role_id === 1) { // client
                 [appointments] = await db.promise().query(`

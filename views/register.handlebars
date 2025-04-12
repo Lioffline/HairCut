@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация | HairCut</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .register-container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Навигационная панель -->
+    {{> navbar}}
+    <div class="container">
+        <div class="register-container bg-white">
+            <h2 class="text-center mb-4">Регистрация</h2>
+            
+            {{#if errors}}
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        {{#each errors}}
+                            <li>{{this.msg}}</li>
+                        {{/each}}
+                    </ul>
+                </div>
+            {{/if}}
+            
+            <form action="/register" method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Email*</label>
+                    <input type="email" class="form-control {{#if errors.[0].path}}is-invalid{{/if}}" 
+                           name="email" value="{{oldInput.email}}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Пароль* (мин. 6 символов, 1 цифра)</label>
+                    <input type="password" class="form-control" name="password" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Подтвердите пароль*</label>
+                    <input type="password" class="form-control" name="confirmPassword" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">ФИО*</label>
+                    <input type="text" class="form-control" name="full_name" value="{{oldInput.full_name}}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Пол*</label>
+                    <select class="form-select" name="gender" required>
+                        <option value="">Выберите пол</option>
+                        <option value="М" {{#eq oldInput.gender 'М'}}selected{{/eq}}>Мужской</option>
+                        <option value="Ж" {{#eq oldInput.gender 'Ж'}}selected{{/eq}}>Женский</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Телефон</label>
+                    <input type="tel" class="form-control" name="phone" value="{{oldInput.phone}}">
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 py-2">Зарегистрироваться</button>
+            </form>
+            
+            <div class="text-center mt-3">
+                <p>Уже есть аккаунт? <a href="/login">Войти</a></p>
+            </div>
+        </div>
+    </div>
+    <!-- Подключаем Bootstrap JS и иконки Bootstrap Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</body>
+</html>

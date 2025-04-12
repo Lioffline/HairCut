@@ -1,0 +1,94 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+  <div class="container">
+    <!-- Логотип и название -->
+    <a class="navbar-brand d-flex align-items-center" href="/">
+      <i class="bi bi-scissors me-2" style="font-size: 1.5rem; color: #9d7aff;"></i>
+      <span class="fw-bold">HairCut</span>
+    </a>
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto">
+        {{#if isAuthenticated}}
+          <!-- Авторизованный пользователь -->
+          <li class="nav-item dropdown">
+            
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+              {{#if user.avatar_path}}
+                <img src="/files/{{user.avatar_path}}" 
+                     class="rounded-circle me-2" 
+                     width="32" height="32" 
+                     alt="{{user.full_name}}">
+              {{else}}
+                <div class="avatar-placeholder rounded-circle bg-primary d-flex align-items-center justify-content-center me-2" 
+                     style="width: 32px; height: 32px;">
+                  <span class="text-white">{{user.full_name}}</span>
+                </div>
+              {{/if}}
+              <span>{{user.full_name}}</span>
+            </a>
+            
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li>
+                <a class="dropdown-item" href="/settings">
+                  <i class="bi bi-gear me-2"></i>Настройки
+                </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                <a class="dropdown-item" href="/appointments/new">
+                  <i class="bi bi-file-plus me-2"></i>Новая запись
+                </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <a class="dropdown-item text-danger" href="/logout">
+                  <i class="bi bi-box-arrow-right me-2"></i>Выйти
+                </a>
+              </li>
+            </ul>
+          </li>
+        {{else}}
+          <!-- Неавторизованный пользователь -->
+          <li class="nav-item">
+            <a class="nav-link" href="/register">
+              <i class="bi bi-person-plus me-1"></i>Регистрация
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/login">
+              <i class="bi bi-box-arrow-in-right me-1"></i>Вход
+            </a>
+          </li>
+        {{/if}}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .avatar-placeholder {
+    font-size: 0.8rem;
+    font-weight: bold;
+  }
+  
+  .dropdown-menu {
+    background-color: #2d2d2d;
+    border: 1px solid #444;
+  }
+  
+  .dropdown-item {
+    color: #f8f9fa;
+  }
+  
+  .dropdown-item:hover {
+    background-color: #3d3d3d;
+    color: #fff;
+  }
+  
+  .navbar {
+    border-bottom: 1px solid #444;
+  }
+</style>

@@ -568,20 +568,19 @@ exports.adminStats = async (req, res) => {
             return res.redirect('/');
         }
 
-        // Статистика по записям
+        // Исправленный запрос для статистики по записям
         const [appointmentStats] = await db.promise().query(`
             SELECT 
                 COUNT(*) as total,
                 SUM(CASE WHEN status = 'запланирована' THEN 1 ELSE 0 END) as planned,
                 SUM(CASE WHEN status = 'выполнена' THEN 1 ELSE 0 END) as completed,
                 SUM(CASE WHEN status = 'отменена' THEN 1 ELSE 0 END) as canceled,
-                AVG(final_price) as avg_price,
-                SUM(final_price) as total_income
+                AVG(CASE WHEN status = 'выполнена' THEN final_price ELSE NULL END) as avg_price,
+                SUM(CASE WHEN status = 'выполнена' THEN final_price ELSE 0 END) as total_income
             FROM appointments
-            WHERE status = 'выполнена'
         `);
 
-        // Статистика по популярности услуг
+        // Остальные запросы остаются без изменений
         const [serviceStats] = await db.promise().query(`
             SELECT h.title, COUNT(*) as count 
             FROM appointments a
@@ -591,7 +590,6 @@ exports.adminStats = async (req, res) => {
             LIMIT 5
         `);
 
-        // Статистика по мастерам
         const [masterStats] = await db.promise().query(`
             SELECT u.full_name, COUNT(*) as count, SUM(a.final_price) as total
             FROM appointments a

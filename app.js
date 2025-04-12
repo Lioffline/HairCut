@@ -47,7 +47,7 @@ helpers.round = function(value) {
 
 helpers.formatDateMin = function() {
     const now = new Date();
-    now.setHours(now.getHours() + 1); // Минимум через час от текущего времени
+    now.setHours(now.getHours() + 1);
     return now.toISOString().slice(0, 16);
 };
 
@@ -80,15 +80,19 @@ Handlebars.registerHelper('truncate', function(str, length) {
 });
 
 const key = process.env.SECRET_KEY;
+app.set('trust proxy', 1); // важно для secure cookies через Railway
+
 app.use(cookieParser(key));
+
 app.use(session({
     secret: key,
-    resave: true,
-    saveUninitialized: true,
+    resave: false,
+    saveUninitialized: false,
     cookie: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 1000 * 7 * 60 * 60 * 24,
+        secure: process.env.NODE_ENV === "production", // HTTPS only
+        sameSite: 'lax', // или 'none' если frontend отдельно
+        maxAge: 1000 * 60 * 60 * 24 * 7 // 7 дней
     }
 }));
 

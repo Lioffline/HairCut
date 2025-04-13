@@ -90,9 +90,9 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // HTTPS only
-        sameSite: 'lax', // или 'none' если frontend отдельно
-        maxAge: 1000 * 60 * 60 * 24 * 7 // 7 дней
+        secure: process.env.NODE_ENV === "production", 
+        sameSite: 'lax', 
+        maxAge: 1000 * 60 * 60 * 24 * 7 
     }
 }));
 

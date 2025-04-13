@@ -20,7 +20,7 @@ exports.index = async (req, res) => {
                     JOIN users u1 ON a.client_id = u1.id
                     JOIN users u2 ON a.master_id = u2.id
                     ORDER BY a.appointment_time DESC
-                    LIMIT 20
+                    LIMIT 100
                 `);
             }
             // Для клиентов показываем их записи
@@ -37,7 +37,7 @@ exports.index = async (req, res) => {
                     JOIN users u ON a.master_id = u.id
                     WHERE a.client_id = ?
                     ORDER BY a.appointment_time DESC
-                    LIMIT 20
+                    LIMIT 100
                 `, [req.session.user.id]);
             }
             // Для мастеров показываем их записи
@@ -54,7 +54,7 @@ exports.index = async (req, res) => {
                     JOIN users u ON a.client_id = u.id
                     WHERE a.master_id = ?
                     ORDER BY a.appointment_time DESC
-                    LIMIT 20
+                    LIMIT 100
                 `, [req.session.user.id]);
             }
         }

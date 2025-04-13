@@ -44,6 +44,9 @@ userRouter.get("/api/masters", async (req, res) => {
 userRouter.get("/appointments/:id/edit", userController.editAppointmentForm);
 userRouter.post("/appointments/:id", userController.updateAppointment);
 userRouter.get("/appointments/:id/cancel", userController.cancelAppointment);
+// Для мастера (POST)
+userRouter.post("/appointments/:id/cancel", userController.cancelAppointmentByMaster);
+
 
 userRouter.post("/appointments/:id/complete", userController.completeAppointment);
 

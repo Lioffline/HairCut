@@ -410,6 +410,28 @@ exports.cancelAppointment = async (req, res) => {
     }
 };
 
+exports.cancelAppointmentByMaster = async (req, res) => {
+    try {
+        const appointmentId = req.params.id;
+        
+        // Проверяем, что запись принадлежит мастеру и еще не выполнена/отменена
+        const [result] = await db.promise().query(
+            'UPDATE appointments SET status = "отменена" WHERE id = ? AND master_id = ? AND status = "запланирована"',
+            [appointmentId, req.session.user.id]
+        );
+        
+        if (result.affectedRows === 0) {
+            req.session.errors = [{ msg: 'Не удалось отменить запись' }];
+        }
+        
+        res.redirect('/');
+    } catch (error) {
+        console.error('Ошибка при отмене записи мастером:', error);
+        req.session.errors = [{ msg: 'Ошибка при отмене записи' }];
+        res.redirect('/');
+    }
+};
+
 
 exports.completeAppointment = async (req, res) => {
     try {
@@ -574,7 +596,6 @@ exports.adminStats = async (req, res) => {
             return res.redirect('/');
         }
 
-        // Исправленный запрос для статистики по записям
         const [appointmentStats] = await db.promise().query(`
             SELECT 
                 COUNT(*) as total,
@@ -586,7 +607,6 @@ exports.adminStats = async (req, res) => {
             FROM appointments
         `);
 
-        // Остальные запросы остаются без изменений
         const [serviceStats] = await db.promise().query(`
             SELECT h.title, COUNT(*) as count 
             FROM appointments a
